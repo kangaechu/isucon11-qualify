@@ -1,0 +1,6 @@
+.?*
+!.gitignore
+/bench/
+/go/
+/local/
+pprof/
