@@ -6,3 +6,6 @@ MYSQL_PASS=isucon
 POST_ISUCONDITION_TARGET_BASE_URL="https://isucondition-1.t.isucon.dev"
 SHINTARO_BATCH_MODE=1
 
+REDIS_HOST="localhost"
+REDIS_PORT="6379"
+REDIS_PASSWORD="isucon"
