@@ -507,11 +507,7 @@ func getIsuList(c echo.Context) error {
 
 		var formattedCondition *GetIsuConditionResponse
 		if foundLastCondition {
-			conditionLevel, err := calculateConditionLevel(lastCondition.Condition)
-			if err != nil {
-				c.Logger().Error(err)
-				return c.NoContent(http.StatusInternalServerError)
-			}
+			conditionLevel := lastCondition.ConditionText
 
 			formattedCondition = &GetIsuConditionResponse{
 				JIAIsuUUID:     lastCondition.JIAIsuUUID,
@@ -1129,11 +1125,7 @@ func getTrend(c echo.Context) error {
 
 			if len(conditions) > 0 {
 				isuLastCondition := conditions[0]
-				conditionLevel, err := calculateConditionLevel(isuLastCondition.Condition)
-				if err != nil {
-					c.Logger().Error(err)
-					return c.NoContent(http.StatusInternalServerError)
-				}
+				conditionLevel := isuLastCondition.ConditionText
 				trendCondition := TrendCondition{
 					ID:        isu.ID,
 					Timestamp: isuLastCondition.Timestamp.Unix(),
