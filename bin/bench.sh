@@ -11,7 +11,8 @@ function check_diff() {
   git fetch origin main
   git diff main origin/main --quiet --exit-code || check_diff_error=1
   git reset --hard origin/main
-  if [ $check_diff_error -eq 1 ]; then
+
+  if [[ -n $(git diff --name-only | grep "bin/bench.sh") ]]; then
     echo "mainブランチが最新ではありません。もう一度実行してください。"
     exit 1
   fi

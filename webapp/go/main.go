@@ -1035,11 +1035,11 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
-				"	AND `timestamp` < :endTime" +
-				"AND `condition_text` in (:keys)" +
-				"ORDER BY `timestamp` DESC" +
-				"LIMIT :limit;"
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jiaIsuUUID" +
+				" AND `timestamp` < :endTime" +
+				" AND `condition_text` in (:keys)" +
+				" ORDER BY `timestamp` DESC" +
+				" LIMIT :limit;"
 
 		var keys []string
 		for key := range conditionLevel {
@@ -1054,11 +1054,14 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		}
 		// 最初にsqlx.Named
 		query, args, err := sqlx.Named(query, input)
+		if err != nil {
+			return nil, err
+		}
 
 		// sqlx.Inを通してあげる必要がある
 		query, args, err = sqlx.In(query, args...)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		// DBのドライバーに合わせたクエリの変換
@@ -1077,12 +1080,12 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jiaIsuUUID" +
 				"	AND `timestamp` < :endTime" +
 				"	AND :startTime <= `timestamp`" +
-				"AND `condition_text` in (:keys)" +
-				"ORDER BY `timestamp` DESC" +
-				"LIMIT :limit;"
+				" AND `condition_text` in (:keys)" +
+				" ORDER BY `timestamp` DESC" +
+				" LIMIT :limit;"
 
 		var keys []string
 		for key := range conditionLevel {
@@ -1098,11 +1101,14 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		}
 		// 最初にsqlx.Named
 		query, args, err := sqlx.Named(query, input)
+		if err != nil {
+			return nil, err
+		}
 
 		// sqlx.Inを通してあげる必要がある
 		query, args, err = sqlx.In(query, args...)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		// DBのドライバーに合わせたクエリの変換
