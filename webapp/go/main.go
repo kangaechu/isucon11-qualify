@@ -1021,25 +1021,77 @@ func getIsuConditions(c echo.Context) error {
 // ISUのコンディションをDBから取得
 func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, conditionLevel map[string]interface{}, startTime time.Time,
 	limit int, isuName string) ([]*GetIsuConditionResponse, error) {
+	// conditionLevelをログに出力
 
 	conditions := []IsuCondition{}
 	var err error
 
 	if startTime.IsZero() {
-		err = db.Select(&conditions,
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
-				"	AND `timestamp` < ?"+
-				"	ORDER BY `timestamp` DESC",
-			jiaIsuUUID, endTime,
-		)
+		//err = db.Select(&conditions,
+		//	"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
+		//		"	AND `timestamp` < ?"+
+		//		"	ORDER BY `timestamp` DESC",
+		//	jiaIsuUUID, endTime,
+		//)
+
+		query :=
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? " +
+				"AND `timestamp` < ?" +
+				"AND `condition_text` in ?" +
+				"ORDER BY `timestamp` DESC" +
+				"LIMIT ?;"
+
+		var keys []string
+		for key := range conditionLevel {
+			keys = append(keys, key)
+		}
+
+		// 一度sqlx.Inを通してあげる必要がある
+		query, args, err := sqlx.In(query, keys)
+		if err != nil {
+			panic(err)
+		}
+
+		// DBのドライバーに合わせたクエリの変換
+		query = db.Rebind(query)
+
+		// クエリを発行
+		err = db.Select(&conditions, query, jiaIsuUUID, endTime, args, limit)
+
 	} else {
-		err = db.Select(&conditions,
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
-				"	AND `timestamp` < ?"+
-				"	AND ? <= `timestamp`"+
-				"	ORDER BY `timestamp` DESC",
-			jiaIsuUUID, endTime, startTime,
-		)
+		//err = db.Select(&conditions,
+		//	"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
+		//		"	AND `timestamp` < ?"+
+		//		"	AND ? <= `timestamp`"+
+		//		"	ORDER BY `timestamp` DESC",
+		//	jiaIsuUUID, endTime, startTime,
+		//)
+
+		query :=
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? " +
+				"	AND `timestamp` < ?" +
+				"	AND ? <= `timestamp`" +
+				"AND `condition_text` in ?" +
+				"ORDER BY `timestamp` DESC" +
+				"LIMIT ?;"
+
+		var keys []string
+		for key := range conditionLevel {
+			keys = append(keys, key)
+		}
+
+		// 一度sqlx.Inを通してあげる必要がある
+		query, args, err := sqlx.In(query, keys)
+		if err != nil {
+			panic(err)
+		}
+
+		// DBのドライバーに合わせたクエリの変換
+		query = db.Rebind(query)
+
+		// クエリを発行
+		err = db.Select(&conditions, query, jiaIsuUUID, endTime, startTime, args, limit)
+
 	}
 	if err != nil {
 		return nil, fmt.Errorf("db error: %v", err)
