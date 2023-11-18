@@ -1035,19 +1035,28 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? " +
-				"AND `timestamp` < ?" +
-				"AND `condition_text` in ?" +
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
+				"	AND `timestamp` < :endTime" +
+				"AND `condition_text` in (:keys)" +
 				"ORDER BY `timestamp` DESC" +
-				"LIMIT ?;"
+				"LIMIT :limit;"
 
 		var keys []string
 		for key := range conditionLevel {
 			keys = append(keys, key)
 		}
 
-		// 一度sqlx.Inを通してあげる必要がある
-		query, args, err := sqlx.In(query, keys)
+		input := map[string]interface{}{
+			"keys":       keys,
+			"jiaIsuUUID": jiaIsuUUID,
+			"endTime":    endTime,
+			"limit":      limit,
+		}
+		// 最初にsqlx.Named
+		query, args, err := sqlx.Named(query, input)
+
+		// sqlx.Inを通してあげる必要がある
+		query, args, err = sqlx.In(query, args...)
 		if err != nil {
 			panic(err)
 		}
@@ -1056,7 +1065,7 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		query = db.Rebind(query)
 
 		// クエリを発行
-		err = db.Select(&conditions, query, jiaIsuUUID, endTime, args, limit)
+		err = db.Select(&conditions, query, args...)
 
 	} else {
 		//err = db.Select(&conditions,
@@ -1068,20 +1077,30 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? " +
-				"	AND `timestamp` < ?" +
-				"	AND ? <= `timestamp`" +
-				"AND `condition_text` in ?" +
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
+				"	AND `timestamp` < :endTime" +
+				"	AND :startTime <= `timestamp`" +
+				"AND `condition_text` in (:keys)" +
 				"ORDER BY `timestamp` DESC" +
-				"LIMIT ?;"
+				"LIMIT :limit;"
 
 		var keys []string
 		for key := range conditionLevel {
 			keys = append(keys, key)
 		}
 
-		// 一度sqlx.Inを通してあげる必要がある
-		query, args, err := sqlx.In(query, keys)
+		input := map[string]interface{}{
+			"keys":       keys,
+			"jiaIsuUUID": jiaIsuUUID,
+			"endTime":    endTime,
+			"startTime":  startTime,
+			"limit":      limit,
+		}
+		// 最初にsqlx.Named
+		query, args, err := sqlx.Named(query, input)
+
+		// sqlx.Inを通してあげる必要がある
+		query, args, err = sqlx.In(query, args...)
 		if err != nil {
 			panic(err)
 		}
@@ -1090,7 +1109,7 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		query = db.Rebind(query)
 
 		// クエリを発行
-		err = db.Select(&conditions, query, jiaIsuUUID, endTime, startTime, args, limit)
+		err = db.Select(&conditions, query, args...)
 
 	}
 	if err != nil {
