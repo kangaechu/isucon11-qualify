@@ -111,7 +111,7 @@ function bench() {
   echo "----------------------------"
   echo "ベンチを実行してください"
   cd "$BENCH_DIR"
-  "$BENCH_DIR"/bench -all-addresses $TARGET_HOST -target $TARGET_HOST -tls -jia-service-url http://localhost:4999
+  "$BENCH_DIR"/bench -all-addresses $TARGET_HOST -target $TARGET_HOST -tls -jia-service-url http://isucondition-4.t.isucon.dev:4999
   echo "実行が終わったらスコアを入力し、enterキーを押して下さい"
   read -r SCORE
 
