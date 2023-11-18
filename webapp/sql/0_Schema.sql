@@ -38,3 +38,6 @@ CREATE TABLE `isu_association_config` (
 
 -- isu_conditionテーブルにjia_isu_uuidとtimestampのインデックスを貼る
 CREATE INDEX idx_isu_condition_jia_isu_uuid_timestamp ON isu_condition (jia_isu_uuid, timestamp);
+
+-- isuテーブルのjia_isu_uuidにインデックスを貼る
+CREATE INDEX idx_isu_jia_isu_uuid ON isu (jia_isu_uuid);
