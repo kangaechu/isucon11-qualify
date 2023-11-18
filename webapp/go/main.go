@@ -1054,11 +1054,14 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		}
 		// 最初にsqlx.Named
 		query, args, err := sqlx.Named(query, input)
+		if err != nil {
+			return nil, err
+		}
 
 		// sqlx.Inを通してあげる必要がある
 		query, args, err = sqlx.In(query, args...)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		// DBのドライバーに合わせたクエリの変換
@@ -1098,11 +1101,14 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		}
 		// 最初にsqlx.Named
 		query, args, err := sqlx.Named(query, input)
+		if err != nil {
+			return nil, err
+		}
 
 		// sqlx.Inを通してあげる必要がある
 		query, args, err = sqlx.In(query, args...)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		// DBのドライバーに合わせたクエリの変換
