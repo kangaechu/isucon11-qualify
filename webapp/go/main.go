@@ -1035,7 +1035,7 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jiaIsuUUID" +
 				" AND `timestamp` < :endTime" +
 				" AND `condition_text` in (:keys)" +
 				" ORDER BY `timestamp` DESC" +
@@ -1077,7 +1077,7 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 		//)
 
 		query :=
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jia_isu_uuid" +
+			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = :jiaIsuUUID" +
 				"	AND `timestamp` < :endTime" +
 				"	AND :startTime <= `timestamp`" +
 				" AND `condition_text` in (:keys)" +
