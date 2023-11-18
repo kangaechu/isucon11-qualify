@@ -1204,7 +1204,6 @@ func postIsuCondition(c echo.Context) error {
 		return c.String(http.StatusNotFound, "not found: isu")
 	}
 
-	isuconditions := []IsuCondition{}
 	for _, cond := range req {
 		timestamp := time.Unix(cond.Timestamp, 0)
 
@@ -1212,19 +1211,11 @@ func postIsuCondition(c echo.Context) error {
 			return c.String(http.StatusBadRequest, "bad request body")
 		}
 
-		isuconditions = append(isuconditions, IsuCondition{
-			JIAIsuUUID: jiaIsuUUID,
-			Timestamp:  timestamp,
-			IsSitting:  cond.IsSitting,
-			Condition:  cond.Condition,
-			Message:    cond.Message,
-		})
-
-		query_string := "INSERT INTO `isu_condition`" +
-			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)" +
-			"	VALUES (:jia_isu_uuid, :timestamp, :is_sitting, :condition, :message)\""
-
-		_, err = tx.NamedExec(query_string, isuconditions)
+		_, err = tx.Exec(
+			"INSERT INTO `isu_condition`"+
+				"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
+				"	VALUES (?, ?, ?, ?, ?)",
+			jiaIsuUUID, timestamp, cond.IsSitting, cond.Condition, cond.Message)
 		if err != nil {
 			c.Logger().Errorf("db error: %v", err)
 			return c.NoContent(http.StatusInternalServerError)
