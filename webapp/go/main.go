@@ -1222,7 +1222,7 @@ func postIsuCondition(c echo.Context) error {
 
 		query_string := "INSERT INTO `isu_condition`" +
 			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)" +
-			"	VALUES (:jia_isu_uuid, :timestamp, :is_sitting, :condition, :message)\""
+			"	VALUES (:jia_isu_uuid, :timestamp, :is_sitting, :condition, :message)"
 
 		_, err = tx.NamedExec(query_string, isuconditions)
 		if err != nil {
