@@ -49,3 +49,7 @@ export ENV_BATCH_SH_FILE="$REPO_DIR/env_batch.sh"
 export BENCH_DIR="$REPO_DIR/bench"
 # ベンチ実行時、Webアクセスを受け取るNginxのホスト名（本番では不要）
 export TARGET_HOST='isucondition-1.t.isucon.dev'
+
+export PPROF_SECONDS=80
+export PPROF_HOST="localhost:3101"
+export APPLICATION_HOST="localhost:3000"
