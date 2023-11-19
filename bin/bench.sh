@@ -12,7 +12,7 @@ function check_diff() {
   # bin/bench.shが差分に含まれていないか確認
   git diff main origin/main --name-only | grep bin/bench.sh && bench_sh_updates=1
   git reset --hard origin/main
-  if [[ -n $bench_sh_updates ]]; then
+  if [[ $bench_sh_updates -ne 0 ]]; then
     echo "bench.shが最新ではありません。もう一度実行してください。"
     exit 1
   fi
