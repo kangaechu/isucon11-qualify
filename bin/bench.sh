@@ -6,14 +6,14 @@ source /home/isucon/env_bench.sh
 
 # リモートのコードとの差分を確認
 function check_diff() {
-  check_diff_error=0
   git switch main
   git fetch origin main
-  git diff main origin/main --quiet --exit-code || check_diff_error=1
+  bench_sh_updates=0
+  # bin/bench.shが差分に含まれていないか確認
+  git diff main origin/main --name-only | grep bin/bench.sh && bench_sh_updates=1
   git reset --hard origin/main
-
-  if [[ -n $(git diff --name-only | grep "bin/bench.sh") ]]; then
-    echo "mainブランチが最新ではありません。もう一度実行してください。"
+  if [[ -n $bench_sh_updates ]]; then
+    echo "bench.shが最新ではありません。もう一度実行してください。"
     exit 1
   fi
 }
