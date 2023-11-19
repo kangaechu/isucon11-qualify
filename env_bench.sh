@@ -51,5 +51,5 @@ export BENCH_DIR="$REPO_DIR/bench"
 export TARGET_HOST='isucondition-1.t.isucon.dev'
 
 export PPROF_SECONDS=80
-export PPROF_HOST="localhost:3101"
+export PPROF_HOST="localhost:3104"
 export APPLICATION_HOST="localhost:3000"
