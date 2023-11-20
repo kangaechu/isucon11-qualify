@@ -188,6 +188,12 @@ function send_result_to_discord() {
   for server in "${APP_SERVERS[@]}"; do
     send_line_to_discord "- journal-$server: $LOG_S3_URL_BASE/journal-$server.txt"
   done
+# pprofのURLを投稿
+  for server in "${APP_SERVERS[@]}"; do
+    #serverの最後の1文字を取得
+    suffix=${server: -1}
+    send_line_to_discord "- pprof-$server: http://localhost:310${suffix}/ui/"
+  done
 
   # APIの下位5件を投稿
   for server in "${APP_SERVERS[@]}"; do
