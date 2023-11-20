@@ -30,6 +30,9 @@ export BATCH_SERVICE_NAME="isushintaro-batch.service"
 # ALPのログを集約するための設定
 export ALP_AGGREGATE_REGEX="^/api/condition/[0-9a-z-]+$,^/api/isu/[0-9a-z-]+/icon$,^/api/isu/[0-9a-z-]+/graph$,^/api/isu/[0-9a-z-]+$,^/isu/[0-9a-z-]+/graph$,^/isu/[0-9a-z-]+$,^/isu/[0-9a-z-]+/condition$"
 
+# Goのバイナリのパス
+export GO_BIN="/home/isucon/local/go/bin/go"
+
 ### ここから下は基本的に設定不要
 
 # バッチログを格納するディレクトリ TODO パスの確定
