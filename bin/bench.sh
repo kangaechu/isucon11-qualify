@@ -93,7 +93,7 @@ function clear_journal_log() {
 function pprof() {
   for server in "${APP_SERVERS[@]}"; do
     # nohup実行時は標準出力・標準エラー出力を/dev/nullにリダイレクトしないと入力待ちとなるので注意
-    ssh $server "nohup $REPO_DIR/bin/pprof.sh > /dev/null 2>&1 &"
+    ssh $server "$REPO_DIR/bin/pprof.sh" > /dev/null 2>&1 &
   done
 }
 
