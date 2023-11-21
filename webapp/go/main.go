@@ -809,7 +809,7 @@ func generateIsuGraphResponse(tx *sqlx.Tx, jiaIsuUUID string, graphDate time.Tim
 			return nil, err
 		}
 
-		truncatedConditionTime := condition.Timestamp.Truncate(time.Hour) // 分以下を削除
+		truncatedConditionTime := condition.Timestamp.Truncate(time.Hour)
 		if truncatedConditionTime != startTimeInThisHour {
 			if len(conditionsInThisHour) > 0 {
 				data, err := calculateGraphDataPoint(conditionsInThisHour)
@@ -901,14 +901,25 @@ func calculateGraphDataPoint(isuConditions []IsuCondition) (GraphDataPoint, erro
 	conditionsCount := map[string]int{"is_broken": 0, "is_dirty": 0, "is_overweight": 0}
 	rawScore := 0
 	for _, condition := range isuConditions {
+		badConditionsCount := 0
 
 		if !isValidConditionFormat(condition.Condition) {
 			return GraphDataPoint{}, fmt.Errorf("invalid condition format")
 		}
 
-		if condition.ConditionText == conditionLevelCritical {
+		for _, condStr := range strings.Split(condition.Condition, ",") {
+			keyValue := strings.Split(condStr, "=")
+
+			conditionName := keyValue[0]
+			if keyValue[1] == "true" {
+				conditionsCount[conditionName] += 1
+				badConditionsCount++
+			}
+		}
+
+		if badConditionsCount >= 3 {
 			rawScore += scoreConditionLevelCritical
-		} else if condition.ConditionText == conditionLevelWarning {
+		} else if badConditionsCount >= 1 {
 			rawScore += scoreConditionLevelWarning
 		} else {
 			rawScore += scoreConditionLevelInfo
