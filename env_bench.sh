@@ -7,7 +7,7 @@ export BENCH_SERVER="b"
 # APサーバの一覧
 export APP_SERVERS=($SERVER_1)
 # DBサーバの一覧
-export DB_SERVERS=($SERVER_1)
+export DB_SERVERS=($SERVER_3)
 # Redisサーバの一覧
 export REDIS_SERVERS=($SERVER_1)
 # 全サーバの一覧
