@@ -800,8 +800,8 @@ func generateIsuGraphResponse(tx *sqlx.Tx, jiaIsuUUID string, graphDate time.Tim
 	var startTimeInThisHour time.Time
 	var condition IsuCondition
 
-	// 1時間分だけでもいいかもしれないが、Truncate(time.Hour)で切り捨てているので、2時間分取得する
-	rows, err := tx.Queryx("SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? AND `timestamp` BETWEEN ? AND ? ORDER BY `timestamp` ASC", jiaIsuUUID, graphDate, graphDate.Add(time.Hour*2))
+	// 24時間分だけでもいいかもしれないが、Truncate(time.Hour)で切り捨てているので、25時間分取得する
+	rows, err := tx.Queryx("SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ? AND `timestamp` BETWEEN ? AND ? ORDER BY `timestamp` ASC", jiaIsuUUID, graphDate, graphDate.Add(time.Hour*25))
 	if err != nil {
 		return nil, fmt.Errorf("db error: %v", err)
 	}
