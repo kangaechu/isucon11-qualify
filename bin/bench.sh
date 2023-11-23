@@ -202,7 +202,7 @@ function send_result_to_discord() {
     send_line_to_discord "- pprof-trace-$server: http://localhost:310${suffix}/ui/source?f=%5Emain."
 
     # pprofのログファイル最新は格納先ディレクトリで最も新しいもの
-    pprof_file_name="$(ssh c1 -C "ls -t1 $PPROF_LOG_DIR | grep '.gz' | head -1")"
+    pprof_file_name="$(ssh $server -C "ls -t1 $PPROF_LOG_DIR | grep '.gz' | head -1")"
     send_line_to_discord "- pprof-log-$server: $LOG_S3_URL_BASE/pprof/$server/$pprof_file_name"
   done
 
