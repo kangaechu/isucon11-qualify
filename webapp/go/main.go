@@ -1149,11 +1149,11 @@ func calculateConditionLevel(condition string) (string, error) {
 func getTrendDiff(c echo.Context) error {
 	res, err := getTrend(c)
 	if err != nil {
-		return err
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	resv2, err := getTrendV2(c)
 	if err != nil {
-		return err
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	c.Logger().Printf("#ISUSHINTARO # compare trend: %s", cmp.Diff(res, resv2))
 	return c.JSON(http.StatusOK, res)
