@@ -1155,10 +1155,8 @@ func getTrendDiff(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	if diff := cmp.Diff(res, resv2); diff != "" {
-		c.Logger().Printf("#ISUSHINTARO # compare trend: %s", cmp.Diff(res, resv2))
-	}
-	return nil
+	c.Logger().Printf("#ISUSHINTARO # compare trend: %s", cmp.Diff(res, resv2))
+	return c.JSON(http.StatusOK, res)
 }
 
 // GET /api/trend
@@ -1229,8 +1227,8 @@ func getTrend(c echo.Context) ([]TrendResponse, error) {
 				Critical:  characterCriticalIsuConditions,
 			})
 	}
-	err := c.JSON(http.StatusOK, res)
-	return res, err
+
+	return res, nil
 }
 
 // GET /api/trend
@@ -1295,8 +1293,7 @@ func getTrendV2(c echo.Context) ([]TrendResponse, error) {
 		}
 	}
 	res = append(res, trendResponse)
-	err = c.JSON(http.StatusOK, res)
-	return res, err
+	return res, nil
 }
 
 // POST /api/condition/:jia_isu_uuid
