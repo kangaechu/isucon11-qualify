@@ -1156,9 +1156,9 @@ func getTrendDiff(c echo.Context) error {
 	if err != nil {
 		c.Logger().Errorf("getTrendV2 error: %v", err)
 	}
-	if len(trend) != len(trendV2) {
-		c.Logger().Infof("trend: %v", trend)
-		c.Logger().Infof("trendV2: %v", trendV2)
+	err = CompareJson(trend, trendV2)
+	if err != nil {
+		c.Logger().Errorf("CompareJson error: %v", err)
 	}
 	return nil
 }
