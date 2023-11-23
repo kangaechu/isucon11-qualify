@@ -232,7 +232,7 @@ func main() {
 	e.GET("/api/isu/:jia_isu_uuid/icon", getIsuIcon)
 	e.GET("/api/isu/:jia_isu_uuid/graph", getIsuGraph)
 	e.GET("/api/condition/:jia_isu_uuid", getIsuConditions)
-	e.GET("/api/trend", getTrend)
+	e.GET("/api/trend", getTrendV2)
 
 	e.POST("/api/condition/:jia_isu_uuid", postIsuCondition)
 
@@ -1213,6 +1213,71 @@ func getTrend(c echo.Context) error {
 			})
 	}
 
+	return c.JSON(http.StatusOK, res)
+}
+
+// GET /api/trend
+// ISUの性格毎の最新のコンディション情報
+func getTrendV2(c echo.Context) error {
+
+	res := []TrendResponse{}
+
+	type TrendRecord struct {
+		Character     string    `db:"character"`
+		ConditionText string    `db:"condition_text"`
+		ID            int       `db:"id"`
+		MaxTimestamp  time.Time `db:"max_timestamp"`
+	}
+
+	trendRecords := []TrendRecord{}
+
+	err := db.Select(&trendRecords, "select `character`, ic2.condition_text, i.id, max_timestamp from isu as i join (select jia_isu_uuid, max(timestamp) as max_timestamp from isu_condition as ic group by jia_isu_uuid) ic on i.jia_isu_uuid = ic.jia_isu_uuid join isu_condition as ic2 on i.jia_isu_uuid = ic2.jia_isu_uuid and ic.max_timestamp = ic2.timestamp order by `character`, condition_text, max_timestamp desc;")
+	if err != nil {
+		c.Logger().Errorf("db error: %v", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	if len(trendRecords) == 0 {
+		return c.JSON(http.StatusOK, res)
+	}
+	trendResponse := TrendResponse{
+		Character: "",
+		Info:      []*TrendCondition{},
+		Warning:   []*TrendCondition{},
+		Critical:  []*TrendCondition{},
+	}
+
+	for _, trendRecord := range trendRecords {
+		if trendResponse.Character != "" && trendResponse.Character != trendRecord.Character {
+			res = append(res, trendResponse)
+			trendResponse = TrendResponse{
+				Character: "",
+				Info:      []*TrendCondition{},
+				Warning:   []*TrendCondition{},
+				Critical:  []*TrendCondition{},
+			}
+		}
+		trendResponse.Character = trendRecord.Character
+		switch trendRecord.ConditionText {
+		case "info":
+			trendResponse.Info = append(trendResponse.Info, &TrendCondition{
+				ID:        trendRecord.ID,
+				Timestamp: trendRecord.MaxTimestamp.Unix(),
+			})
+		case "warning":
+			trendResponse.Warning = append(trendResponse.Warning, &TrendCondition{
+				ID:        trendRecord.ID,
+				Timestamp: trendRecord.MaxTimestamp.Unix(),
+			})
+		case "critical":
+			trendResponse.Critical = append(trendResponse.Critical, &TrendCondition{
+				ID:        trendRecord.ID,
+				Timestamp: trendRecord.MaxTimestamp.Unix(),
+			})
+		default:
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+	res = append(res, trendResponse)
 	return c.JSON(http.StatusOK, res)
 }
 
