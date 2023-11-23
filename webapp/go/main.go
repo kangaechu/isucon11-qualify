@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/labstack/gommon/log"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -20,11 +21,11 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/go-cmp/cmp"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 )
 
 const (
@@ -232,7 +233,7 @@ func main() {
 	e.GET("/api/isu/:jia_isu_uuid/icon", getIsuIcon)
 	e.GET("/api/isu/:jia_isu_uuid/graph", getIsuGraph)
 	e.GET("/api/condition/:jia_isu_uuid", getIsuConditions)
-	e.GET("/api/trend", getTrendV2)
+	e.GET("/api/trend", getTrendDiff)
 
 	e.POST("/api/condition/:jia_isu_uuid", postIsuCondition)
 
@@ -1145,9 +1146,22 @@ func calculateConditionLevel(condition string) (string, error) {
 	return conditionLevel, nil
 }
 
+func getTrendDiff(c echo.Context) error {
+	res, err := getTrend(c)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	resv2, err := getTrendV2(c)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	c.Logger().Printf("#ISUSHINTARO # compare trend: %s", cmp.Diff(res, resv2))
+	return c.JSON(http.StatusOK, res)
+}
+
 // GET /api/trend
 // ISUの性格毎の最新のコンディション情報
-func getTrend(c echo.Context) error {
+func getTrend(c echo.Context) ([]TrendResponse, error) {
 
 	res := []TrendResponse{}
 
@@ -1159,8 +1173,9 @@ func getTrend(c echo.Context) error {
 		)
 		if err != nil {
 			c.Logger().Errorf("db error: %v", err)
-			return c.NoContent(http.StatusInternalServerError)
+			return nil, c.NoContent(http.StatusInternalServerError)
 		}
+		c.JSON(http.StatusOK, res)
 
 		characterInfoIsuConditions := []*TrendCondition{}
 		characterWarningIsuConditions := []*TrendCondition{}
@@ -1173,7 +1188,7 @@ func getTrend(c echo.Context) error {
 			)
 			if err != nil {
 				c.Logger().Errorf("db error: %v", err)
-				return c.NoContent(http.StatusInternalServerError)
+				return nil, c.NoContent(http.StatusInternalServerError)
 			}
 
 			if len(conditions) > 0 {
@@ -1213,12 +1228,12 @@ func getTrend(c echo.Context) error {
 			})
 	}
 
-	return c.JSON(http.StatusOK, res)
+	return res, nil
 }
 
 // GET /api/trend
 // ISUの性格毎の最新のコンディション情報
-func getTrendV2(c echo.Context) error {
+func getTrendV2(c echo.Context) ([]TrendResponse, error) {
 
 	res := []TrendResponse{}
 
@@ -1234,10 +1249,10 @@ func getTrendV2(c echo.Context) error {
 	err := db.Select(&trendRecords, "select `character`, ic2.condition_text, i.id, max_timestamp from isu as i join (select jia_isu_uuid, max(timestamp) as max_timestamp from isu_condition as ic group by jia_isu_uuid) ic on i.jia_isu_uuid = ic.jia_isu_uuid join isu_condition as ic2 on i.jia_isu_uuid = ic2.jia_isu_uuid and ic.max_timestamp = ic2.timestamp order by `character`, condition_text, max_timestamp desc;")
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, c.NoContent(http.StatusInternalServerError)
 	}
 	if len(trendRecords) == 0 {
-		return c.JSON(http.StatusOK, res)
+		return nil, c.JSON(http.StatusOK, res)
 	}
 	trendResponse := TrendResponse{
 		Character: "",
@@ -1274,11 +1289,11 @@ func getTrendV2(c echo.Context) error {
 				Timestamp: trendRecord.MaxTimestamp.Unix(),
 			})
 		default:
-			return c.NoContent(http.StatusInternalServerError)
+			return nil, c.NoContent(http.StatusInternalServerError)
 		}
 	}
 	res = append(res, trendResponse)
-	return c.JSON(http.StatusOK, res)
+	return res, nil
 }
 
 // POST /api/condition/:jia_isu_uuid
