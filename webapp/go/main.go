@@ -233,7 +233,7 @@ func main() {
 	e.GET("/api/isu/:jia_isu_uuid/icon", getIsuIcon)
 	e.GET("/api/isu/:jia_isu_uuid/graph", getIsuGraph)
 	e.GET("/api/condition/:jia_isu_uuid", getIsuConditions)
-	e.GET("/api/trend", getTrend)
+	e.GET("/api/trend", getTrendV2)
 
 	e.POST("/api/condition/:jia_isu_uuid", postIsuCondition)
 
