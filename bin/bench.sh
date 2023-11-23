@@ -93,7 +93,7 @@ function clear_journal_log() {
 function pprof() {
   for server in "${APP_SERVERS[@]}"; do
     # nohup実行時は標準出力・標準エラー出力を/dev/nullにリダイレクトしないと入力待ちとなるので注意
-    ssh $server "$REPO_DIR/bin/pprof.sh" > /dev/null 2>&1 &
+    ssh $server "$REPO_DIR/bin/pprof.sh" >/dev/null 2>&1 &
   done
 }
 
@@ -146,6 +146,12 @@ function bench() {
     ssh $server -C "journalctl -u $PROGRAM_SERVICE_NAME" >"$LOG_DIR/journal-$server.txt"
   done
 
+  # pprofログの取得
+  for server in "${APP_SERVERS[@]}"; do
+    mkdir -p "$LOG_DIR/pprof/$server/"
+    scp -r "$server:$PPROF_LOG_DIR/*" "$LOG_DIR/pprof/$server/"
+  done
+
   # s3に転送
   aws s3 sync "$LOG_BASE_DIR" "s3://$LOG_S3_BUCKET/"
 
@@ -188,11 +194,16 @@ function send_result_to_discord() {
   for server in "${APP_SERVERS[@]}"; do
     send_line_to_discord "- journal-$server: $LOG_S3_URL_BASE/journal-$server.txt"
   done
-# pprofのURLを投稿
+  # pprofのURLを投稿
   for server in "${APP_SERVERS[@]}"; do
     #serverの最後の1文字を取得
     suffix=${server: -1}
-    send_line_to_discord "- pprof-$server: http://localhost:310${suffix}/ui/"
+    send_line_to_discord "- pprof-ui-$server: http://localhost:310${suffix}/ui/"
+    send_line_to_discord "- pprof-trace-$server: http://localhost:310${suffix}/ui/source?f=%5Emain."
+
+    # pprofのログファイル最新は格納先ディレクトリで最も新しいもの
+    pprof_file_name="$(ssh c1 -C "ls -t1 $PPROF_LOG_DIR | grep '.gz' | head -1")"
+    send_line_to_discord "- pprof-log-$server: $LOG_S3_URL_BASE/pprof/$server/$pprof_file_name"
   done
 
   # APIの下位5件を投稿

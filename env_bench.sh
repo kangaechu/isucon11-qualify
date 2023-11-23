@@ -47,6 +47,8 @@ export LOG_S3_BUCKET='isushintaro-isulog'
 export ENV_SH_FILE="$REPO_DIR/env.sh"
 # 環境設定が格納されたファイル
 export ENV_BATCH_SH_FILE="$REPO_DIR/env_batch.sh"
+# pprofログが格納されるベースディレクトリ
+export PPROF_LOG_DIR="/home/isucon/pprof"
 
 # ベンチマークのコードを格納するディレクトリ（本番では不要）
 export BENCH_DIR="$REPO_DIR/bench"
